@@ -6,7 +6,7 @@ import * as cheerio from "cheerio";
  * Keeps: src, href, alt, controls — removes everything else.
  */
 export function cleanHtml(html: string, title?: string): string {
-  const $ = cheerio.load(html, { decodeEntities: false });
+  const $ = cheerio.load(html, null, false);
 
   // Remove elements that add no value for translation/AI
   $("script, style, noscript, iframe[src*='ads'], [class*='ads'], [class*='banner']").remove();

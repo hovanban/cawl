@@ -44,8 +44,9 @@ desktop.ini
 *.tsbuildinfo
 next-env.d.ts
 
-# Claude Code local settings
-.claude/
+# Claude Code local settings (keep commands)
+.claude/*
+!.claude/commands/
 
 # Debug scripts
 debug_*.mjs
