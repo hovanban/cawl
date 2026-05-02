@@ -10,7 +10,7 @@ cd $DEPLOY_PATH
 git pull origin main
 
 echo "==> [2/5] Cài dependencies..."
-npm ci --omit=dev
+npm ci
 
 echo "==> [3/5] Generate Prisma client..."
 npx prisma generate
