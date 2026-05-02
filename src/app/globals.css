@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { font-size: 14px; }
+
+  body {
+    background-color: #0B0F14;
+    color: #E6EDF3;
+    font-family: "Geist", "Inter", system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #232A34; border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2f3946; }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid #3B82F6;
+    outline-offset: 2px;
+  }
+
+  /* Prose overrides for dark mode */
+  .prose-dark {
+    color: #9DA7B3;
+  }
+  .prose-dark h1, .prose-dark h2, .prose-dark h3,
+  .prose-dark h4, .prose-dark h5, .prose-dark h6 {
+    color: #E6EDF3;
+  }
+  .prose-dark a { color: #3B82F6; }
+  .prose-dark code {
+    background: #161B22;
+    border: 1px solid #232A34;
+    border-radius: 4px;
+    padding: 0.1em 0.4em;
+    color: #93C5FD;
+  }
+}

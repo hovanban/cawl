@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+// JobStatus values: IDLE | RUNNING | PAUSED | COMPLETED | FAILED
+// RunStatus values: RUNNING | COMPLETED | FAILED | CANCELLED
+
+model CrawlJob {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  startUrl    String
+  maxDepth    Int      @default(3)
+  maxPages    Int      @default(100)
+  limitPosts  Int      @default(20)
+  rateLimit   Int      @default(1000) // ms between requests
+  concurrency Int      @default(3)    // parallel requests
+  schedule    String?                 // cron expression, null = manual only
+  aiPrompt               String?  // prompt sent to AI per page
+  aiEnabled              Boolean  @default(false)
+  translateBeforeRewrite Boolean  @default(false) // dịch sang tiếng Việt trước khi AI rewrite
+  aiPromptId             String?  @db.ObjectId    // AiPrompt template dùng cho auto-rewrite khi crawl
+
+  // Đăng bài lên website khác
+  publishUrl        String?
+  publishApiKey     String?
+  publishUserId     String?
+  publishMartialArt String?
+  autoPublish       Boolean  @default(false)
+
+  email       String?
+  martialArt  String?
+
+  status      String   @default("IDLE")
+
+  // Listing page selectors
+  titleSelector      String?  // article title selector on listing page
+  detailLinkSelector String?  // article link selector on listing page
+  imageListSelector  String?  // thumbnail selector on listing page
+
+  // API mode (for JSON APIs like Strapi — skips HTML parsing entirely)
+  apiToken          String?  // Bearer token for Authorization header
+  apiBaseUrl        String?  // base URL to construct article links, e.g. "https://www.vothuat.vn"
+  apiArticleUrlField String? // JSON field containing article URL (e.g. "remotePostUrl"); falls back to slug
+
+  // Detail page selectors
+  contentSelector       String?  // e.g. "article.fck_detail"
+  removeElementSelector String?  // e.g. ".ads, .related, script" (comma-separated)
+  imageDetailSelector   String?  // e.g. "article img"
+  videoSelector         String?  // e.g. "video source, iframe[src*='youtube']"
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  pages CrawledPage[]
+  runs  CrawlRun[]
+}
+
+model CrawledPage {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  url                String
+  depth              Int      @default(0)
+  title              String?
+  thumbnail          String?  // thumbnail URL from listing page
+  content            String?  // HTML of extracted content area
+  images             String?  // JSON array of image URLs
+  videoUrl           String?  // first video URL found
+  aiResult             String?  // plain-text AI output (uses stripped content)
+  currentTitle         String?  // bản hiện tại (dịch / rewrite / edit thủ công)
+  currentContent       String?  // bản hiện tại — HTML
+  currentDescription   String?  // meta description bản hiện tại
+  authorEmail          String?  // từ job.email
+  martialArt           String?  // từ job.martialArt
+  statusCode         Int?
+  error              String?
+  crawledAt          DateTime @default(now())
+
+  jobId String   @db.ObjectId
+  job   CrawlJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  runId String?   @db.ObjectId
+  run   CrawlRun? @relation(fields: [runId], references: [id])
+
+  publishRecords PublishRecord[]
+
+  @@unique([jobId, url])
+}
+
+// Generic key-value store for app settings (e.g. deepl_api_key, deepl_target_lang)
+model AppSetting {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  key   String @unique
+  value String
+}
+
+model AiPrompt {
+  id   String @id @default(auto()) @map("_id") @db.ObjectId
+  name String
+
+  // Shared system role for all sub-prompts
+  systemRole String @default("")
+
+  // Title rewrite — placeholder: {blog_title}
+  titleTemplate String @default("")
+
+  // Content rewrite — placeholder: {blog_content}
+  contentTemplate String @default("")
+
+  // Description rewrite — placeholder: {short_details}
+  descriptionTemplate String @default("")
+
+  // Title + Description combined rewrite — placeholders: {blog_title}, {short_details}
+  titleDescriptionTemplate String @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PublishSite {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  apiUrl    String
+  apiKey    String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  publishRecords PublishRecord[]
+}
+
+model PublishRecord {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  pageId      String      @db.ObjectId
+  page        CrawledPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  siteId      String      @db.ObjectId
+  site        PublishSite @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  siteName    String
+  publishedAt DateTime    @default(now())
+}
+
+model User {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  email       String   @unique
+  password    String
+  name        String   @default("")
+  role        String   @default("user")   // user | admin | partner
+  permissions String[]                    // per-user overrides (empty = use role defaults)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  permissions String[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model CrawlRun {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  status         String    @default("RUNNING")
+  pagesFound     Int       @default(0)
+  pagesProcessed Int       @default(0)
+  pagesSkipped   Int       @default(0)
+  errors         Int       @default(0)
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+
+  jobId String   @db.ObjectId
+  job   CrawlJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  pages CrawledPage[]
+}
