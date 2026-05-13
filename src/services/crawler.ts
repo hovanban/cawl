@@ -545,6 +545,7 @@ export async function runCrawl(config: CrawlConfig): Promise<void> {
       if (api && apiArticle._apiContent !== undefined) {
         detail = {
           content: apiArticle._apiContent || apiArticle._apiExcerpt || "",
+          comments: null,
           images: [],
           videoUrl: null,
           title: article.title,
