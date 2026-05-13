@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 interface AiPrompt { id: string; name: string; }
 
 interface GeneratedArticle {
-  title: string; content: string; description: string;
-  titleRaw: string; contentRaw: string; descriptionRaw: string;
+  title: string; content: string; description: string; comments: string;
+  titleRaw: string; contentRaw: string; descriptionRaw: string; commentsRaw: string;
 }
 
 interface Props { pageId: string; pageTitle: string | null; onClose: () => void; onApplied?: () => void; }
 
 type Step = "select" | "loading" | "result" | "saving" | "error";
-type Tab  = "title" | "content" | "description";
+type Tab  = "title" | "content" | "description" | "comments";
 
 export function AiPreviewModal({ pageId, pageTitle, onClose, onApplied }: Props) {
   const [prompts, setPrompts]       = useState<AiPrompt[]>([]);
@@ -74,6 +74,7 @@ export function AiPreviewModal({ pageId, pageTitle, onClose, onApplied }: Props)
           currentTitle:       result.title,
           currentContent:     result.content,
           currentDescription: result.description,
+          ...(result.comments && { currentComments: result.comments }),
         }),
       });
       if (!res.ok) throw new Error("Lưu thất bại");
@@ -90,6 +91,7 @@ export function AiPreviewModal({ pageId, pageTitle, onClose, onApplied }: Props)
     { key: "title",       label: "Tiêu đề"  },
     { key: "content",     label: "Nội dung" },
     { key: "description", label: "Mô tả"    },
+    ...(result?.comments ? [{ key: "comments" as Tab, label: "Comment" }] : []),
   ];
 
   return (
@@ -152,8 +154,8 @@ export function AiPreviewModal({ pageId, pageTitle, onClose, onApplied }: Props)
                   <div className="flex items-start gap-3 px-4 py-3 bg-purple-500/10 border border-purple-500/20 rounded-sm text-[12px] text-purple-400">
                     <svg className="shrink-0 mt-0.5" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                     <div>
-                      <p className="font-medium mb-0.5">Sẽ chạy 3 lời gọi AI song song:</p>
-                      <p className="text-purple-400/70">Title · Content · Description — dùng Claude Sonnet</p>
+                      <p className="font-medium mb-0.5">Sẽ chạy AI song song:</p>
+                      <p className="text-purple-400/70">Title · Content · Description · Comment (nếu có) — dùng Claude Sonnet</p>
                     </div>
                   </div>
 
@@ -218,6 +220,14 @@ export function AiPreviewModal({ pageId, pageTitle, onClose, onApplied }: Props)
                     [&_h1]:text-xl [&_h2]:text-lg [&_h3]:text-base [&_p]:my-1.5 [&_li]:ml-4 [&_li]:list-disc [&_a]:text-brand"
                   dangerouslySetInnerHTML={{ __html: result.content }}
                 />
+              )}
+
+              {tab === "comments" && (
+                <div className="bg-surface-muted border border-surface-border rounded-sm p-4">
+                  <p className="text-[11px] font-medium text-content-muted uppercase tracking-wider mb-2">Comments đã rewrite</p>
+                  <pre className="text-[13px] text-content-primary whitespace-pre-wrap leading-relaxed">{result.comments}</pre>
+                  <p className="text-[11px] text-content-muted mt-3">{result.comments.length} ký tự</p>
+                </div>
               )}
 
               {tab === "description" && (

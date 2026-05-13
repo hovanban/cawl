@@ -20,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const body = await req.json();
-  const fields = ["name", "systemRole", "titleTemplate", "contentTemplate", "descriptionTemplate", "titleDescriptionTemplate"];
+  const fields = ["name", "systemRole", "titleTemplate", "contentTemplate", "descriptionTemplate", "commentTemplate", "titleDescriptionTemplate"];
   const data: Record<string, string> = {};
   for (const f of fields) {
     if (body[f] !== undefined) data[f] = body[f];

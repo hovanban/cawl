@@ -32,6 +32,7 @@ interface SelectorConfig {
   removeElementSelector?: string;
   imageDetailSelector?: string;
   videoSelector?: string;
+  commentSelector?: string;
 }
 
 interface ApiConfig {
@@ -62,6 +63,7 @@ interface ArticleRef {
 
 interface ArticleDetail {
   content: string;
+  comments: string | null;
   images: string[];
   videoUrl: string | null;
   title: string | null;
@@ -412,7 +414,7 @@ async function crawlArticleDetail(
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     if (axios.isAxiosError(err)) statusCode = err.response?.status ?? null;
-    return { content: "", images: [], videoUrl: null, title: null, statusCode, error: msg };
+    return { content: "", comments: null, images: [], videoUrl: null, title: null, statusCode, error: msg };
   }
 
   const $ = cheerio.load(html);
@@ -450,7 +452,18 @@ async function crawlArticleDetail(
     if (raw) videoUrl = raw.startsWith("http") ? raw : new URL(raw, url).href;
   }
 
-  return { content, images, videoUrl, title: pageTitle, statusCode, error: null };
+  // Comments
+  let comments: string | null = null;
+  if (sel.commentSelector) {
+    const texts: string[] = [];
+    $(sel.commentSelector).each((_, el) => {
+      const t = $(el).text().trim();
+      if (t) texts.push(t);
+    });
+    if (texts.length) comments = texts.join("\n\n");
+  }
+
+  return { content, comments, images, videoUrl, title: pageTitle, statusCode, error: null };
 }
 
 // ---------------------------------------------------------------------------
@@ -573,6 +586,7 @@ export async function runCrawl(config: CrawlConfig): Promise<void> {
             title,
             thumbnail: article.thumbnail,
             content: detail.content || null,
+            comments: detail.comments,
             images: detail.images.length ? JSON.stringify(detail.images) : null,
             videoUrl: detail.videoUrl,
             statusCode: detail.statusCode,
@@ -588,6 +602,7 @@ export async function runCrawl(config: CrawlConfig): Promise<void> {
             title,
             thumbnail: article.thumbnail,
             content: detail.content || null,
+            comments: detail.comments,
             images: detail.images.length ? JSON.stringify(detail.images) : null,
             videoUrl: detail.videoUrl,
             statusCode: detail.statusCode,

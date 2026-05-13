@@ -9,6 +9,7 @@ interface AiPrompt {
   titleTemplate: string;
   contentTemplate: string;
   descriptionTemplate: string;
+  commentTemplate: string;
   titleDescriptionTemplate: string;
   createdAt: string;
 }
@@ -79,12 +80,13 @@ const EMPTY_FORM = {
   titleTemplate: DEFAULT_TITLE,
   contentTemplate: DEFAULT_CONTENT,
   descriptionTemplate: DEFAULT_DESCRIPTION,
+  commentTemplate: "",
   titleDescriptionTemplate: DEFAULT_TITLE_DESCRIPTION,
 };
 
 type FormData = typeof EMPTY_FORM;
 
-type Section = "system" | "title" | "content" | "description" | "titleDescription";
+type Section = "system" | "title" | "content" | "description" | "comment" | "titleDescription";
 
 const SECTIONS: { key: Section; label: string; field: keyof FormData; placeholder: string; hint: string }[] = [
   {
@@ -114,6 +116,13 @@ const SECTIONS: { key: Section; label: string; field: keyof FormData; placeholde
     field: "descriptionTemplate",
     placeholder: "{short_details}",
     hint: "Dùng {short_details} làm placeholder (500 ký tự đầu của nội dung).",
+  },
+  {
+    key: "comment",
+    label: "Comment Rewrite Prompt",
+    field: "commentTemplate",
+    placeholder: "{blog_comments}",
+    hint: "Dùng {blog_comments} làm placeholder. Để trống = giữ nguyên comment gốc (hoặc đã dịch).",
   },
   {
     key: "titleDescription",
@@ -160,6 +169,7 @@ export function PromptSettings() {
       titleTemplate: p.titleTemplate,
       contentTemplate: p.contentTemplate,
       descriptionTemplate: p.descriptionTemplate,
+      commentTemplate: p.commentTemplate,
       titleDescriptionTemplate: p.titleDescriptionTemplate,
     });
     setOpenSection("system");
@@ -231,6 +241,7 @@ export function PromptSettings() {
                     { label: "Title", value: p.titleTemplate },
                     { label: "Content", value: p.contentTemplate },
                     { label: "Description", value: p.descriptionTemplate },
+                    { label: "Comment", value: p.commentTemplate },
                     { label: "Title & Desc", value: p.titleDescriptionTemplate },
                   ].map(({ label, value }) => (
                     <div key={label} className="bg-surface-muted rounded-sm border border-surface-border px-2 py-1.5">

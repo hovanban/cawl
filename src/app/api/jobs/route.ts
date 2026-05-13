@@ -48,6 +48,7 @@ export async function POST(req: NextRequest) {
     removeElementSelector,
     imageDetailSelector,
     videoSelector,
+    commentSelector,
     // API mode
     apiToken,
     apiBaseUrl,
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
       removeElementSelector: removeElementSelector || null,
       imageDetailSelector: imageDetailSelector || null,
       videoSelector: videoSelector || null,
+      commentSelector: commentSelector || null,
       // API mode
       apiToken: apiToken || null,
       apiBaseUrl: apiBaseUrl || null,

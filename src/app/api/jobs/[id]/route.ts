@@ -47,7 +47,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   // Coerce empty strings to null for optional selectors
   const selectorFields = [
     "titleSelector", "detailLinkSelector", "imageListSelector",
-    "contentSelector", "removeElementSelector", "imageDetailSelector", "videoSelector",
+    "contentSelector", "removeElementSelector", "imageDetailSelector", "videoSelector", "commentSelector",
     "aiPrompt", "apiToken", "apiBaseUrl", "apiArticleUrlField",
     "email", "martialArt",
   ];

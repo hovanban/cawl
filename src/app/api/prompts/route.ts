@@ -13,14 +13,14 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, systemRole = "", titleTemplate = "", contentTemplate = "", descriptionTemplate = "", titleDescriptionTemplate = "" } = body;
+  const { name, systemRole = "", titleTemplate = "", contentTemplate = "", descriptionTemplate = "", commentTemplate = "", titleDescriptionTemplate = "" } = body;
 
   if (!name?.trim()) {
     return NextResponse.json({ error: "name is required" }, { status: 400 });
   }
 
   const prompt = await prisma.aiPrompt.create({
-    data: { name, systemRole, titleTemplate, contentTemplate, descriptionTemplate, titleDescriptionTemplate },
+    data: { name, systemRole, titleTemplate, contentTemplate, descriptionTemplate, commentTemplate, titleDescriptionTemplate },
   });
   return NextResponse.json(prompt, { status: 201 });
 }

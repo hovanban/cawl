@@ -11,7 +11,7 @@ Hướng dẫn deploy tự động lên server production.
 | `SERVER_IP` | `46.202.167.100` | IP hoặc domain của server |
 | `SERVER_USER` | `root` | User SSH (ví dụ: `ubuntu`, `root`) |
 | `DEPLOY_PATH` | `/home/baovothuat-bot/htdocs/bot.baovothuat.com` | Thư mục deploy trên server |
-| `DATABASE_URL` | `mongodb+srv://user:pass@cluster.mongodb.net/cawl` | MongoDB connection string |
+| `DATABASE_URL` | `mongodb://cawl_user:Cawl%402025%21Secure@localhost:27017/cawl?authSource=admin` | MongoDB connection string (VPS) |
 | `ANTHROPIC_API_KEY` | `sk-ant-...` | API key Anthropic (hoặc cài sau qua /settings) |
 | `NEXT_PUBLIC_APP_URL` | `https://bot.baovothuat.com` | Domain production |
 | `JWT_ACCESS_SECRET` | `__CHUỖI_NGẪU_NHIÊN_32_KÝ_TỰ__` | Bí mật ký JWT access token |
@@ -133,7 +133,7 @@ nano .env  # Điền các biến môi trường
 ## 2. File `.env` trên server
 
 ```env
-DATABASE_URL="mongodb+srv://__USER__:__PASSWORD__@__CLUSTER__.mongodb.net/cawl?retryWrites=true&w=majority"
+DATABASE_URL="mongodb://cawl_user:Cawl%402025%21Secure@localhost:27017/cawl?authSource=admin"
 ANTHROPIC_API_KEY="sk-ant-..."
 NEXT_PUBLIC_APP_URL="https://bot.baovothuat.com"
 JWT_ACCESS_SECRET="__CHUỖI_NGẪU_NHIÊN_32_KÝ_TỰ__"

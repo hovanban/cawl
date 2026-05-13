@@ -11,7 +11,7 @@ interface FormData {
   rateLimit: number; concurrency: number; schedule: string;
   email: string; martialArt: string;
   detailLinkSelector: string; titleSelector: string; imageListSelector: string;
-  contentSelector: string; removeElementSelector: string; imageDetailSelector: string; videoSelector: string;
+  contentSelector: string; removeElementSelector: string; imageDetailSelector: string; videoSelector: string; commentSelector: string;
   apiToken: string; apiBaseUrl: string; apiArticleUrlField: string;
 }
 
@@ -19,7 +19,7 @@ const DEFAULTS: FormData = {
   name: "", startUrl: "", maxDepth: 3, limitPosts: 20, rateLimit: 1000, concurrency: 3, schedule: "",
   email: "", martialArt: "",
   detailLinkSelector: "", titleSelector: "", imageListSelector: "",
-  contentSelector: "", removeElementSelector: "", imageDetailSelector: "", videoSelector: "",
+  contentSelector: "", removeElementSelector: "", imageDetailSelector: "", videoSelector: "", commentSelector: "",
   apiToken: "", apiBaseUrl: "", apiArticleUrlField: "",
 };
 
@@ -111,7 +111,8 @@ export function JobForm({ jobId }: JobFormProps) {
         detailLinkSelector: job.detailLinkSelector ?? "", titleSelector: job.titleSelector ?? "",
         imageListSelector: job.imageListSelector ?? "", contentSelector: job.contentSelector ?? "",
         removeElementSelector: job.removeElementSelector ?? "", imageDetailSelector: job.imageDetailSelector ?? "",
-        videoSelector: job.videoSelector ?? "", apiToken: job.apiToken ?? "",
+        videoSelector: job.videoSelector ?? "", commentSelector: job.commentSelector ?? "",
+        apiToken: job.apiToken ?? "",
         apiBaseUrl: job.apiBaseUrl ?? "", apiArticleUrlField: job.apiArticleUrlField ?? "",
       }))
       .finally(() => setLoading(false));
@@ -134,7 +135,8 @@ export function JobForm({ jobId }: JobFormProps) {
       detailLinkSelector: form.detailLinkSelector || null, titleSelector: form.titleSelector || null,
       imageListSelector: form.imageListSelector || null, contentSelector: form.contentSelector || null,
       removeElementSelector: form.removeElementSelector || null, imageDetailSelector: form.imageDetailSelector || null,
-      videoSelector: form.videoSelector || null, apiToken: form.apiToken || null,
+      videoSelector: form.videoSelector || null, commentSelector: form.commentSelector || null,
+      apiToken: form.apiToken || null,
       apiBaseUrl: form.apiBaseUrl || null, apiArticleUrlField: form.apiArticleUrlField || null,
     };
 
@@ -290,6 +292,10 @@ export function JobForm({ jobId }: JobFormProps) {
                 <Field label="Video">
                   <input type="text" value={form.videoSelector} onChange={(e) => set("videoSelector", e.target.value)}
                     placeholder="video source, iframe[src*='youtube']" className={monoCls} />
+                </Field>
+                <Field label="Comment" hint="CSS selector cho danh sách comment. VD: .comment-item, .cmt-content">
+                  <input type="text" value={form.commentSelector} onChange={(e) => set("commentSelector", e.target.value)}
+                    placeholder=".comment-item, ul.comments li" className={monoCls} />
                 </Field>
               </Section>
 

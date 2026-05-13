@@ -36,6 +36,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
       removeElementSelector: job.removeElementSelector ?? undefined,
       imageDetailSelector:   job.imageDetailSelector   ?? undefined,
       videoSelector:         job.videoSelector         ?? undefined,
+      commentSelector:       job.commentSelector       ?? undefined,
     },
     api: (job.apiToken || job.apiBaseUrl) ? {
       token:           job.apiToken           ?? undefined,

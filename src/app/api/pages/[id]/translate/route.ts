@@ -65,15 +65,13 @@ export async function POST(_req: NextRequest, { params }: Params) {
   const targetLang = settingMap["deepl_target_lang"] || "VI";
 
   try {
-    const textsToTranslate: string[] = [];
-    const hasTitle = !!page.title;
-    const hasContent = !!page.content;
+    const hasTitle    = !!page.title;
+    const hasContent  = !!page.content;
+    const hasComments = !!page.comments;
 
-    if (hasTitle) textsToTranslate.push(page.title!);
-
-    // Translate title first (plain text)
     let translatedTitle: string | undefined;
     let translatedContent: string | undefined;
+    let translatedComments: string | undefined;
 
     if (hasTitle) {
       const [result] = await deeplTranslate([page.title!], apiKey, targetLang);
@@ -86,13 +84,20 @@ export async function POST(_req: NextRequest, { params }: Params) {
       translatedContent = result;
     }
 
+    // Translate comments as plain text
+    if (hasComments) {
+      const [result] = await deeplTranslate([page.comments!], apiKey, targetLang);
+      translatedComments = result;
+    }
+
     const updated = await prisma.crawledPage.update({
       where: { id: params.id },
       data: {
-        ...(translatedTitle !== undefined && { currentTitle: translatedTitle }),
-        ...(translatedContent !== undefined && { currentContent: translatedContent }),
+        ...(translatedTitle    !== undefined && { currentTitle:    translatedTitle    }),
+        ...(translatedContent  !== undefined && { currentContent:  translatedContent  }),
+        ...(translatedComments !== undefined && { currentComments: translatedComments }),
       },
-      select: { id: true, currentTitle: true, currentContent: true },
+      select: { id: true, currentTitle: true, currentContent: true, currentComments: true },
     });
 
     return NextResponse.json(updated);

@@ -52,6 +52,7 @@ model CrawlJob {
   removeElementSelector String?  // e.g. ".ads, .related, script" (comma-separated)
   imageDetailSelector   String?  // e.g. "article img"
   videoSelector         String?  // e.g. "video source, iframe[src*='youtube']"
+  commentSelector       String?  // e.g. ".comment-item, .cmt-content"
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -67,11 +68,13 @@ model CrawledPage {
   title              String?
   thumbnail          String?  // thumbnail URL from listing page
   content            String?  // HTML of extracted content area
+  comments           String?  // plain text of extracted comments (joined)
   images             String?  // JSON array of image URLs
   videoUrl           String?  // first video URL found
   aiResult             String?  // plain-text AI output (uses stripped content)
   currentTitle         String?  // bản hiện tại (dịch / rewrite / edit thủ công)
   currentContent       String?  // bản hiện tại — HTML
+  currentComments      String?  // bản dịch của comments
   currentDescription   String?  // meta description bản hiện tại
   authorEmail          String?  // từ job.email
   martialArt           String?  // từ job.martialArt
@@ -111,6 +114,9 @@ model AiPrompt {
 
   // Description rewrite — placeholder: {short_details}
   descriptionTemplate String @default("")
+
+  // Comment rewrite — placeholder: {blog_comments}
+  commentTemplate          String @default("")
 
   // Title + Description combined rewrite — placeholders: {blog_title}, {short_details}
   titleDescriptionTemplate String @default("")

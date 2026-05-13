@@ -22,15 +22,19 @@ export async function POST(req: NextRequest, { params }: Params) {
     if (!page) return NextResponse.json({ error: "Bài viết không tồn tại" }, { status: 404 });
     if (!site) return NextResponse.json({ error: "Site không tồn tại" }, { status: 404 });
 
-    const title   = page.currentTitle       || page.title   || "";
-    const content = page.currentContent     || page.content || "";
-    const excerpt = page.currentDescription || "";
+    const title    = page.currentTitle       || page.title   || "";
+    const content  = page.currentContent     || page.content || "";
+    const excerpt  = page.currentDescription || "";
+    const comments = (page as Record<string, unknown>).currentComments as string | null
+                  || (page as Record<string, unknown>).comments as string | null
+                  || "";
 
     const payload = {
       title,
       excerpt,
-      thumbnail: page.thumbnail   || "",
+      thumbnail:   page.thumbnail   || "",
       content,
+      comments,
       martialArt:  page.martialArt  || "",
       tags:        [] as string[],
       authorEmail: page.authorEmail || "",

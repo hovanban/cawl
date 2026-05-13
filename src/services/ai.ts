@@ -63,20 +63,23 @@ async function callClaude(systemRole: string, userPrompt: string, maxTokens = AR
 // ---------------------------------------------------------------------------
 
 export interface AiPromptConfig {
-  systemRole:         string;
-  titleTemplate:      string;
-  contentTemplate:    string;
+  systemRole:          string;
+  titleTemplate:       string;
+  contentTemplate:     string;
   descriptionTemplate: string;
+  commentTemplate:     string;
 }
 
 export interface GeneratedArticle {
   title:           string;
   content:         string;
   description:     string;
+  comments:        string;
   // raw AI outputs per field (for display)
   titleRaw:        string;
   contentRaw:      string;
   descriptionRaw:  string;
+  commentsRaw:     string;
 }
 
 // ---------------------------------------------------------------------------
@@ -108,13 +111,14 @@ export async function generateArticle(
   title: string,
   content: string,
   promptConfig: AiPromptConfig,
+  comments?: string,
 ): Promise<GeneratedArticle> {
-  const { systemRole, titleTemplate, contentTemplate, descriptionTemplate } = promptConfig;
+  const { systemRole, titleTemplate, contentTemplate, descriptionTemplate, commentTemplate } = promptConfig;
 
-  const safeTitle   = sanitize(title);
-  const safeContent = sanitize(content).slice(0, CONTENT_CHAR_LIMIT);
-  // Use first 500 chars of content as "short details" for description prompt
+  const safeTitle    = sanitize(title);
+  const safeContent  = sanitize(content).slice(0, CONTENT_CHAR_LIMIT);
   const shortDetails = safeContent.slice(0, 500);
+  const safeComments = comments ? sanitize(comments).slice(0, CONTENT_CHAR_LIMIT) : "";
 
   const runTitle = titleTemplate.trim()
     ? () => retry(() => callClaude(systemRole, titleTemplate.replace(/\{blog_title\}/g, safeTitle)), 3)
@@ -128,19 +132,26 @@ export async function generateArticle(
     ? () => retry(() => callClaude(systemRole, descriptionTemplate.replace(/\{short_details\}/g, shortDetails), 300), 3)
     : () => Promise.resolve("");
 
-  const [titleRaw, contentRaw, descriptionRaw] = await Promise.all([
+  const runComments = (commentTemplate.trim() && safeComments)
+    ? () => retry(() => callClaude(systemRole, commentTemplate.replace(/\{blog_comments\}/g, safeComments), ARTICLE_MAX_TOKENS), 3)
+    : () => Promise.resolve(safeComments);
+
+  const [titleRaw, contentRaw, descriptionRaw, commentsRaw] = await Promise.all([
     runTitle(),
     runContent(),
     runDescription(),
+    runComments(),
   ]);
 
   return {
-    title:          titleRaw   || safeTitle,
-    content:        contentRaw || content,
-    description:    descriptionRaw,
+    title:       titleRaw   || safeTitle,
+    content:     contentRaw || content,
+    description: descriptionRaw,
+    comments:    commentsRaw,
     titleRaw,
     contentRaw,
     descriptionRaw,
+    commentsRaw,
   };
 }
 
