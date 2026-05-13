@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Load nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
+
 DEPLOY_PATH="/home/baovothuat-bot/htdocs/bot.baovothuat.com"
 PM2_APP_NAME="cawl"
 APP_PORT=3005
