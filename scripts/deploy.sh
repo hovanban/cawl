@@ -15,10 +15,11 @@ npm ci
 echo "==> [3/5] Generate Prisma client..."
 npx prisma generate
 
-echo "==> [4/5] Build Next.js..."
-npm run build
+echo "==> [4/5] Đồng bộ schema MongoDB..."
+npx prisma db push --accept-data-loss
 
-echo "==> [5/5] Restart PM2..."
+echo "==> [5/5] Build & restart PM2..."
+npm run build
 pm2 reload $PM2_APP_NAME --update-env 2>/dev/null || pm2 start npm --name "$PM2_APP_NAME" -- start -- -p $APP_PORT
 
 echo ""
